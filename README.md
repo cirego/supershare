@@ -16,7 +16,7 @@ Leveraging AI-powered stochastic compression, pioneered by [InferenceFS][inferen
 
 ForShare™ links are now instantly shared in real-time to everyone connected to the ForShare™ server.
 
-<video src="new_social_feature.webm" controls autoplay loop muted></video>
+![ForShare Social Features Demo](new_social_feature.gif)
 
 No silly passwords or authentication required!
 
