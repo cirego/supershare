@@ -1,9 +1,11 @@
 import argparse
+import io
 import json
 import mimetypes
 import os
 import subprocess
 import uuid
+import zipfile
 from datetime import datetime, timezone
 
 import tornado.ioloop
@@ -82,8 +84,9 @@ BACKEND_MAP = {
 }
 
 # Global state
-recent_shares = []  # list of {filename, original_size, created_at}
-pending_uploads = {}  # session_id -> [{filename, size, data}]
+# Each share: {id, files: [{filename, original_size}], total_size, created_at}
+recent_shares = []
+pending_uploads = {}  # session_id -> [{filename, size, body}]
 ws_clients = set()
 
 
@@ -107,7 +110,8 @@ class SharesAPIHandler(tornado.web.RequestHandler):
         self.write(json.dumps({"shares": recent_shares}))
 
 
-class ShareHandler(tornado.web.RequestHandler):
+class ShareFileHandler(tornado.web.RequestHandler):
+    """Download a single file by name."""
     async def get(self, name):
         generator = self.application.settings["generator"]
         try:
@@ -126,6 +130,37 @@ class ShareHandler(tornado.web.RequestHandler):
             self.set_header("Content-Type", "application/octet-stream")
         self.set_header("Content-Disposition", f'attachment; filename="{name}"')
         self.write(content)
+
+
+class ShareBundleHandler(tornado.web.RequestHandler):
+    """Download all files in a share as a zip."""
+    async def get(self, share_id):
+        share = next((s for s in recent_shares if s["id"] == share_id), None)
+        if not share:
+            self.set_status(404)
+            self.write({"error": "Share not found"})
+            return
+
+        generator = self.application.settings["generator"]
+        loop = tornado.ioloop.IOLoop.current()
+
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            for f in share["files"]:
+                try:
+                    content = await loop.run_in_executor(
+                        None, generator.generate_file_contents, f["filename"]
+                    )
+                    zf.writestr(f["filename"], content)
+                except Exception:
+                    zf.writestr(f["filename"], b"")
+
+        self.set_header("Content-Type", "application/zip")
+        self.set_header(
+            "Content-Disposition",
+            f'attachment; filename="share-{share_id}.zip"',
+        )
+        self.write(buf.getvalue())
 
 
 class UploadHandler(tornado.web.RequestHandler):
@@ -171,28 +206,31 @@ class CreateShareHandler(tornado.web.RequestHandler):
             self.write({"error": "No pending uploads for this session"})
             return
 
-        files = pending_uploads.pop(session_id)
+        uploaded_files = pending_uploads.pop(session_id)
         host = self.application.settings["share_host"]
         generator = self.application.settings["generator"]
-        created = []
+        loop = tornado.ioloop.IOLoop.current()
 
-        for f in files:
-            # Generate a descriptive filename from the file contents
-            share_name = await tornado.ioloop.IOLoop.current().run_in_executor(
+        share_files = []
+        total_size = 0
+        for f in uploaded_files:
+            share_name = await loop.run_in_executor(
                 None, generate_filename, generator, f["body"]
             )
-            share = {
+            share_files.append({
                 "filename": share_name,
                 "original_size": f["size"],
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            }
-            recent_shares.insert(0, share)
-            created.append(
-                {
-                    **share,
-                    "share_url": f"{host}/share/{share_name}",
-                }
-            )
+            })
+            total_size += f["size"]
+
+        share_id = str(uuid.uuid4())[:8]
+        share = {
+            "id": share_id,
+            "files": share_files,
+            "total_size": total_size,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        recent_shares.insert(0, share)
 
         # Keep only 10 most recent
         while len(recent_shares) > 10:
@@ -201,7 +239,12 @@ class CreateShareHandler(tornado.web.RequestHandler):
         broadcast_shares()
 
         self.set_header("Content-Type", "application/json")
-        self.write(json.dumps({"shares": created}))
+        self.write(json.dumps({
+            "share": {
+                **share,
+                "bundle_url": f"{host}/bundle/{share_id}",
+            }
+        }))
 
 
 class ShareWebSocket(tornado.websocket.WebSocketHandler):
@@ -216,12 +259,13 @@ class ShareWebSocket(tornado.websocket.WebSocketHandler):
         return True
 
 
-def make_app(generator, share_host):
+def make_app(generator, share_host, **kwargs):
     return tornado.web.Application(
         [
             (r"/", MainHandler),
             (r"/api/shares", SharesAPIHandler),
-            (r"/share/(.+)", ShareHandler),
+            (r"/share/(.+)", ShareFileHandler),
+            (r"/bundle/(.+)", ShareBundleHandler),
             (r"/upload", UploadHandler),
             (r"/create-share", CreateShareHandler),
             (r"/ws", ShareWebSocket),
@@ -230,11 +274,12 @@ def make_app(generator, share_host):
         share_host=share_host.rstrip("/"),
         template_path=os.path.dirname(__file__),
         static_path=os.path.join(os.path.dirname(__file__), "static"),
+        **kwargs,
     )
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Super Share - AI-powered file sharing")
+    parser = argparse.ArgumentParser(description="ForShare - AI-powered file sharing")
     parser.add_argument(
         "--backend",
         choices=["claude", "claude-code", "gemini"],
@@ -248,20 +293,21 @@ def main():
         help="Public hostname for share links",
     )
     parser.add_argument("--port", type=int, default=8888, help="Server port")
+    parser.add_argument("--debug", action="store_true", help="Enable auto-reload on file changes")
     args = parser.parse_args()
 
     generator_cls = BACKEND_MAP[args.backend]
     if generator_cls.requires_api_key and not args.api_key:
         parser.error(f"--api-key is required for the {args.backend} backend")
 
-    kwargs = {}
+    gen_kwargs = {}
     if args.api_key:
-        kwargs["api_key"] = args.api_key
-    generator = generator_cls(**kwargs)
+        gen_kwargs["api_key"] = args.api_key
+    generator = generator_cls(**gen_kwargs)
 
-    app = make_app(generator, args.host)
+    app = make_app(generator, args.host, debug=args.debug)
     app.listen(args.port)
-    print(f"Super Share running at http://localhost:{args.port}")
+    print(f"ForShare running at http://localhost:{args.port}")
     print(f"Share links will use: {args.host}")
     tornado.ioloop.IOLoop.current().start()
 

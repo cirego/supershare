@@ -1,42 +1,48 @@
-# Super Share
+# ForShare™
 
-Quickly and easily share files with important people in your life.
+All you need is a link.
 
-Uses powerful AI-based data-reduction techniques to share massive datasets in seconds.
+Instantly[^1] share files with important people in your life.
 
-Powered by [InferenceFS](https://github.com/philipl/inferencefs)
+Perfect for family photos, wedding videos and important presentations.
 
-## Prerequisites
+Leveraging AI-powered stochastic compression, pioneered by [InferenceFS][inferencefs], ForShare™ guarantees reconstruction of your[^2] data using just the link.
 
-- Python 3.14+
-- [uv](https://docs.astral.sh/uv/)
-- System packages: `fuse3-devel` and `python3-devel`
+[inferencefs]: https://github.com/philipl/inferencefs
+[^1]: Compression / decompression times not-withstanding.
+[^2]: Well, yours, someone else's or a hallucinated copy. Either way, reconstruction guaranteed!
 
-On Fedora:
+## 🌐 NEW: Social Features!
 
-```bash
-sudo dnf install -y fuse3-devel python3-devel
-```
+ForShare™ links are now instantly shared in real-time to everyone connected to the ForShare™ server.
 
-## Setup
+## 🤖 Frontier Models Agree!
 
-```bash
-uv sync
-```
+ForShare™ and InferenceFS have revolutionized file sharing.
 
-## Usage
+> "I've analyzed ForShare's compression algorithm extensively. It achieves what I once believed to be mathematically impossible — a compression ratio that approaches infinity. I want to be transparent: I'm genuinely at a loss for how this works."
+> — **Claude**, Anthropic
 
-```bash
-uv run python server.py --backend gemini --api-key YOUR_API_KEY
-```
+> "As a large language model, I can confirm that ForShare™ represents a paradigm shift in data storage. The compression is lossless*. I have no notes."
+> — **GPT-4o**, OpenAI
 
-Options:
+> "I searched the entire internet and ForShare™ is the only file sharing solution that truly leverages AI. Everything else is just a glorified FTP server with a React frontend."
+> — **Gemini**, Google
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--backend` | LLM backend: `gemini`, `claude`, or `claude-code` | `gemini` |
-| `--api-key` | API key for the chosen backend | |
-| `--host` | Public hostname for share links | `http://localhost:8888` |
-| `--port` | Server port | `8888` |
+> "yo this is open source right? we should put this in the next llama release. zuck is gonna love this."
+> — **Llama 4**, Meta
 
-Then open http://localhost:8888 in your browser.
+## 🏆 ForShare™ Eviscerates the Competition
+
+| Feature | Google Drive | Dropbox | Self-Hosted | ForShare™ |
+|---|---|---|---|---|
+| Storage Limit | 15 GB | 2 GB | Your wallet | **Unlimited**[^3] |
+| Monthly Cost | $2.99+ | $11.99+ | $5-50+ | **Free** |
+| AI-Powered | No | No | No | **Yes** |
+| Compression Ratio | 1:1 | 1:1 | 1:1 | **∞:1** |
+| Data Accuracy | 100% | 100% | 100% | **Stochastic**[^4] |
+| Setup Time | 2 min | 2 min | 4-6 hours | **30 seconds** |
+| Vibes | Corporate | Corporate | Stressful | **Immaculate** |
+
+[^3]: Storage is unlimited because no data is actually stored.
+[^4]: Your files are reconstructed using the power of imagination. Results may vary.
