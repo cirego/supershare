@@ -10,11 +10,15 @@ Leveraging AI-powered stochastic compression, pioneered by [InferenceFS][inferen
 
 [inferencefs]: https://github.com/philipl/inferencefs
 [^1]: Compression / decompression times not-withstanding.
-[^2]: Well, yours, someone else's or a hallucinated copy. Either way, reconstruction guaranteed!
+[^2]: Well, yours, someone else's or a hallucinated copy. Either way, reconstruction satisfaction guaranteed!
 
 ## 🌐 NEW: Social Features!
 
 ForShare™ links are now instantly shared in real-time to everyone connected to the ForShare™ server.
+
+<video src="new_social_feature.webm" controls autoplay loop muted></video>
+
+No silly passwords or authentication required!
 
 ## 🤖 Frontier Models Agree!
 
@@ -34,15 +38,16 @@ ForShare™ and InferenceFS have revolutionized file sharing.
 
 ## 🏆 ForShare™ Eviscerates the Competition
 
-| Feature | Google Drive | Dropbox | Self-Hosted | ForShare™ |
+| | ForShare™ | Google Drive | Dropbox | Self-Hosted |
 |---|---|---|---|---|
-| Storage Limit | 15 GB | 2 GB | Your wallet | **Unlimited**[^3] |
-| Monthly Cost | $2.99+ | $11.99+ | $5-50+ | **Free** |
-| AI-Powered | No | No | No | **Yes** |
-| Compression Ratio | 1:1 | 1:1 | 1:1 | **∞:1** |
-| Data Accuracy | 100% | 100% | 100% | **Stochastic**[^4] |
-| Setup Time | 2 min | 2 min | 4-6 hours | **30 seconds** |
-| Vibes | Corporate | Corporate | Stressful | **Immaculate** |
+| Storage Limit | **Unlimited**[^3] | 15 GB | 2 GB | Your wallet |
+| Monthly Cost | **Free**[^4] | $2.99+ | $11.99+ | $5-50+ |
+| AI-Powered | **Yes** | No | No | No |
+| Effective Reduction | ∞ | 0 | 0 | 0 |
+| Data Accuracy | **Stochastic**[^4] | 100% | 100% | 100% |
+| Setup Time | **30 seconds** | 2 min | 2 min | 4-6 hours |
+| Vibes | **Immaculate** | Corporate | Corporate | Stressful |
 
 [^3]: Storage is unlimited because no data is actually stored.
-[^4]: Your files are reconstructed using the power of imagination. Results may vary.
+[^4]: Fits in most cloud providers free tier. AI costs not included.
+[^5]: Your files are reconstructed using the power of imagination. Results may vary.
