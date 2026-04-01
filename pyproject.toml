@@ -1,0 +1,9 @@
+[project]
+name = "supershare"
+version = "0.1.0"
+description = "Share files instantly with AI-powered compression"
+requires-python = ">=3.14"
+dependencies = [
+    "tornado>=6.4",
+    "inferencefs @ git+https://github.com/philipl/inferencefs",
+]
